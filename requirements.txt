@@ -1,0 +1,9 @@
+# Do not include azure-functions-worker as it may conflict with the Azure Functions platform
+
+azure-functions
+azure-digitaltwins-core
+azure-identity
+
+openpyxl
+
+git+https://github.com/Cosmo-Tech/cosmotech-api-python-client.git#egg=cosmotech_api
