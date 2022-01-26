@@ -1,22 +1,18 @@
-from collections import defaultdict
+import csv
+import io
+import json
+import os
+import tempfile
+from typing import Union
 
 import azure.functions as func
-from azure.identity import DefaultAzureCredential
 from azure.digitaltwins.core import DigitalTwinsClient
-from azure.digitaltwins.core._generated.models import QueryTwinsOptions
+from azure.identity import DefaultAzureCredential
 
 import cosmotech_api
 from cosmotech_api.api.dataset_api import DatasetApi
-from cosmotech_api.api.workspace_api import WorkspaceApi
 from cosmotech_api.api.scenario_api import ScenarioApi
-
-import tempfile
-import os
-import json
-
-from typing import Union
-import io
-import csv
+from cosmotech_api.api.workspace_api import WorkspaceApi
 
 from openpyxl import load_workbook
 
@@ -25,11 +21,11 @@ class ScenarioDownloader:
 
     def __init__(self, workspace_id: str, organization_id: str):
         self.credentials = DefaultAzureCredential()
-        scope = "http://dev.api.cosmotech.com/.default"
+        scope = os.environ.get("COSMOTECH_API_SCOPE")
         token = self.credentials.get_token(scope)
 
         self.configuration = cosmotech_api.Configuration(
-            host="https://dev.api.cosmotech.com",
+            host=os.environ.get("COSMOTECH_API_HOST"),
             discard_unknown_keys=True,
             access_token=token.token
         )
@@ -128,8 +124,7 @@ class ScenarioDownloader:
     def _download_adt_content(self, adt_adress: str) -> dict:
         client = DigitalTwinsClient(adt_adress, self.credentials)
         query_expression = 'SELECT * FROM digitaltwins'
-        options = QueryTwinsOptions(max_items_per_page=1000000)
-        query_result = client.query_twins(query_expression, query_twins_options=options)
+        query_result = client.query_twins(query_expression)
         json_content = dict()
         for twin in query_result:
             entity_type = twin.get('$metadata').get('$model').split(':')[-1].split(';')[0]
@@ -142,7 +137,7 @@ class ScenarioDownloader:
             json_content[entity_type].append(t_content)
 
         relations_query = 'SELECT * FROM relationships'
-        query_result = client.query_twins(relations_query, query_twins_options=options)
+        query_result = client.query_twins(relations_query)
         for relation in query_result:
             tr = {
                 "$relationshipId": "id",
@@ -200,4 +195,4 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     content['datasets'] = dl.get_all_datasets(scenario_id=scenario_id)
     content['parameters'] = dl.get_all_parameters(scenario_id=scenario_id)
 
-    return func.HttpResponse(body=json.dumps(content))
+    return func.HttpResponse(body=json.dumps(content), headers={"Content-Type": "application/json"})
