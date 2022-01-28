@@ -2,7 +2,13 @@ import json
 
 import azure.functions as func
 
-from scenario_downloader import ScenarioDownloader
+from .scenario_downloader import ScenarioDownloader
+
+
+def apply_update(content: dict) -> dict:
+    updated_content = content
+    # Apply any transformation on the content here
+    return updated_content
 
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
@@ -21,4 +27,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     content['datasets'] = dl.get_all_datasets(scenario_id=scenario_id)
     content['parameters'] = dl.get_all_parameters(scenario_id=scenario_id)
 
-    return func.HttpResponse(body=json.dumps(content), headers={"Content-Type": "application/json"})
+    updated_content = apply_update(content)
+
+    return func.HttpResponse(body=json.dumps(updated_content), headers={"Content-Type": "application/json"})
