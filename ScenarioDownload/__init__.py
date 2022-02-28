@@ -1,3 +1,5 @@
+# Copyright (c) Cosmo Tech corporation.
+# Licensed under the MIT license.
 from cosmotech_scenario_download.generate_main import generate_main
 
 

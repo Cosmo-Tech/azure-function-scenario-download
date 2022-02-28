@@ -1,3 +1,5 @@
+# Copyright (c) Cosmo Tech corporation.
+# Licensed under the MIT license.
 import azure.functions as func
 from .scenario_downloader import ScenarioDownloader
 

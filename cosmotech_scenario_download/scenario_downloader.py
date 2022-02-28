@@ -1,3 +1,5 @@
+# Copyright (c) Cosmo Tech corporation.
+# Licensed under the MIT license.
 import csv
 import io
 import json
@@ -33,12 +35,12 @@ class ScenarioDownloader:
         self.organization_id = organization_id
 
     def get_scenario_data(self, scenario_id: str):
-        with cosmotech_api.ApiClient(self.configuration) as api_client:
-            api_instance = ScenarioApi(api_client)
-            scenario_data = api_instance.find_scenario_by_id(organization_id=self.organization_id,
-                                                             workspace_id=self.workspace_id,
-                                                             scenario_id=scenario_id)
-        return scenario_data
+            with cosmotech_api.ApiClient(self.configuration) as api_client:
+                api_instance = ScenarioApi(api_client)
+                scenario_data = api_instance.find_scenario_by_id(organization_id=self.organization_id,
+                                                                 workspace_id=self.workspace_id,
+                                                                 scenario_id=scenario_id)
+            return scenario_data
 
     def download_dataset(self, dataset_id: str) -> (str, str, Union[str, None]):
         with cosmotech_api.ApiClient(self.configuration) as api_client:
