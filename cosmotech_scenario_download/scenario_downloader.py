@@ -75,7 +75,7 @@ class ScenarioDownloader:
                 tmp_file.write(dl_file.read())
             content = dict()
             if ".xls" in file_name:
-                wb = load_workbook(target_file)
+                wb = load_workbook(target_file, data_only=True)
                 for sheet_name in wb.sheetnames:
                     sheet = wb[sheet_name]
                     content[sheet_name] = list()
