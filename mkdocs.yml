@@ -1,0 +1,6 @@
+site_name: Cosmo-Tech/azure-function-scenario-download
+site_url: https://github.com/Cosmo-Tech/azure-function-scenario-download
+nav:
+    - Home: index.md
+    - Outputs: function_output.md
+theme: readthedocs
