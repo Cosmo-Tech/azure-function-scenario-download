@@ -4,3 +4,5 @@ nav:
     - Home: index.md
     - Outputs: function_output.md
 theme: readthedocs
+extra_css:
+    - css/extra.css
