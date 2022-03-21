@@ -1,0 +1,155 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "siteName": {
+      "type": "string",
+      "defaultValue": "[concat('AzFunc-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "The name of the function app."
+      }
+    },
+    "storageAccountName": {
+      "type": "String",
+      "defaultValue": "[concat('store', uniqueString(resourceGroup().id))]"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "csmApiHost": {
+      "type": "string",
+      "defaultValue": "https://dev.api.cosmotech.com",
+      "metadata": {
+        "description": "The address to the cosmotech api"
+      }
+    },
+    "azCliID": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Client id of an app registration having access to the cosmotech api"
+      }
+    },
+    "azCliSecret": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Client secret of an app registration having access to the cosmotech api"
+      }
+    },
+    "csmApiScope": {
+      "type": "string",
+      "defaultValue": "http://dev.api.cosmotech.com/.default",
+      "metadata": {
+        "description": "The address to the cosmotech api"
+      }
+    },
+    "packageAddress": {
+      "type": "string",
+      "defaultValue": "https://github.com/Cosmo-Tech/azure-function-scenario-download/releases/download/test_v0/artifact.zip",
+      "metadata": {
+        "description": "The address of the package to be deployed"
+      }
+    }
+  },
+  "variables": {
+    "hostingPlanName": "[concat('hpn-', resourceGroup().name)]",
+    "storageAccountid": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2021-03-01",
+      "name": "[parameters('siteName')]",
+      "kind": "functionapp,linux",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "name": "[parameters('siteName')]",
+        "enabled": true,
+        "reserved": true,
+        "siteConfig": {
+          "linuxFxVersion": "python|3.9",
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "python"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', parameters('storageAccountName'), ';AccountKey=', listKeys(variables('storageAccountid'),'2019-06-01').keys[0].value)]"
+            },
+            {
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "[parameters('packageAddress')]"
+            },
+            {
+              "name": "AZURE_CLIENT_ID",
+              "value": "[parameters('azCliID')]",
+              "slotSetting": false
+            },
+            {
+              "name": "AZURE_CLIENT_SECRET",
+              "value": "[parameters('azCliSecret')]",
+              "slotSetting": false
+            },
+            {
+              "name": "AZURE_TENANT_ID",
+              "value": "[subscription().tenantId]",
+              "slotSetting": false
+            },
+            {
+              "name": "COSMOTECH_API_HOST",
+              "value": "[parameters('csmApiHost')]",
+              "slotSetting": false
+            },
+            {
+              "name": "COSMOTECH_API_SCOPE",
+              "value": "[parameters('csmApiScope')]",
+              "slotSetting": false
+            }
+          ]
+        },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanName'))]",
+        "clientAffinityEnabled": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-06-01",
+      "name": "[variables('hostingPlanName')]",
+      "kind": "linux",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Y1",
+        "tier": "Dynamic"
+      },
+      "properties": {
+        "name": "[variables('hostingPlanName')]",
+        "computeMode": "Dynamic",
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[parameters('storageAccountName')]",
+      "apiVersion": "2019-06-01",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
+      }
+    }
+  ]
+}
