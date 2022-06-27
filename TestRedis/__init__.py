@@ -7,7 +7,7 @@ import shutil
 import os
 from csv import DictWriter
 
-from CosmoTech_Modelops_Library.core.importer.model_importer import ModelImporter
+from CosmoTech_Acceleration_Library.Modelops.core.io.model_importer import ModelImporter
 import time
 
 
@@ -19,11 +19,10 @@ def apply_update(content: dict, scenario_data: dict) -> dict:
     :return: A dict of data that should be json equivalent that will be sent as the body of the response of your function call
     """
 
-    ts = int(time.time())
     tmp_folder = "./temp_test_redis"
     os.makedirs(tmp_folder, exist_ok=True)
     for dataset_name, dataset in content['datasets'].items():
-        mi = ModelImporter(host='localhost', port=6379, name=f'Graph{ts % 1000000}')
+        mi = ModelImporter(host='localhost', port=6379, name=f'ADT_Import_{dataset_name}')
         dirpath = tempfile.mkdtemp(dir=tmp_folder)
         d_content = dataset['content']
         keys = d_content.keys()
