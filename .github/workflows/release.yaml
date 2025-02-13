@@ -24,9 +24,7 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - name: install cryptography dependency
-        run: pip install --no-deps --platform manylinux_2_17_x86_64 --target .python_packages/lib/site-packages/ -r requirements-cryptography.txt
-      - name: install other dependencies
+      - name: install dependencies
         run: pip install --target .python_packages/lib/site-packages/ -r requirements.txt
       - name: make artifact
         run: zip -r artifact.zip . -x ".git/*" ".github/*" ".gitignore"
